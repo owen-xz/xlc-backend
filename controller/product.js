@@ -43,6 +43,14 @@ const productController = {
             total
         })
     }),
+    getProduct: handleErrAsync(async (req, res, next) => {
+        const { productId } = req.params
+        const product = await Product.findById(productId)
+        if(!product) {
+            return next(appErr(400, '查無此 Id！', next))
+        }
+        handleSuccess(res, product)
+    }),
     createProduct: handleErrAsync(async (req, res, next) => {
         const { body } = req
         const { name, type, options } = body
@@ -81,8 +89,8 @@ const productController = {
     }),
     deleteProduct: handleErrAsync(async (req, res, next) => {
         const { productId } = req.params
-        const post = await Product.findByIdAndDelete(productId)
-        if(!post) {
+        const product = await Product.findByIdAndDelete(productId)
+        if(!product) {
             return next(appErr(400, '查無此 Id！', next))
         }
         handleSuccess(res, '')

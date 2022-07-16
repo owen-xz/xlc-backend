@@ -6,6 +6,7 @@ var router = express.Router();
 
 /* GET users listing. */
 router.get('/products/', isAuth, productController.getProducts)
+router.get('/product/:productId', isAuth, productController.getProduct)
 router.post('/product/', isAuth, productController.createProduct)
 router.delete('/products/', isAuth, productController.deleteProducts)
 router.delete('/product/:productId', isAuth, productController.deleteProduct)
