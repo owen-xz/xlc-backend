@@ -55,9 +55,8 @@ const product = new mongoose.Schema(
             }
         ],
         status: {
-            type: String,
-            enum: ['上架', '下架'],
-            default: '上架'
+            type: Boolean,
+            default: true
         },
         createdAt: {
             type: Date,
