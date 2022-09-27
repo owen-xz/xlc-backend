@@ -10,9 +10,9 @@ const product = new mongoose.Schema(
             type: String
         },
         type: {
-            type: String,
-            enum: ['器材', '食品', '課程'],
-            default: '器材'
+            type: mongoose.Schema.ObjectId,
+            ref: 'type',
+            require: [true, 'type 必填']
         },
         options: [
             {

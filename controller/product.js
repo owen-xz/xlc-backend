@@ -1,4 +1,5 @@
 const Product = require('../model/products')
+const Type = require('../model/types')
 const User = require('../model/users')
 const handleSuccess = require('../handler/handleSuccess')
 const appErr = require('../handler/appErr')
@@ -31,6 +32,10 @@ const productController = {
         const searchKeyword = keyword ? {"name": new RegExp(req.query.keyword)} : {};
         const total = await Product.countDocuments({})
         const products = await Product.find(searchKeyword)
+        .populate({
+            path: 'type',
+            select: 'name'
+        })
         .populate({
             path: 'comments.user',
             select: 'name'
@@ -100,7 +105,7 @@ const productController = {
         const { name, type, options } = body
         const { productId } = params
         if(!name || !name.trim()) {
-            return next(appErr(400, '請輸入貼文內容', next))
+            return next(appErr(400, '請輸入產品名稱', next))
         }
         if(!type) {
             return next(appErr(400, '請輸入產品類型', next))
