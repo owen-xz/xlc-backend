@@ -7,7 +7,7 @@ const handleErrAsync = require('../handler/handleErrAsync')
 
 const productController = {
     getProducts: handleErrAsync(async (req, res, next) => {
-        const { sort, keyword, offset, maxCount } = req.query
+        const { sort, keyword, type, offset, maxCount } = req.query
         if(!offset) {
             return next(appErr(400, 'offset is required', next))
         }
@@ -30,8 +30,10 @@ const productController = {
                 filterSort = '-score'
         }
         const searchKeyword = keyword ? {"name": new RegExp(req.query.keyword)} : {};
-        const total = await Product.countDocuments({})
-        const products = await Product.find(searchKeyword)
+        const searchType = type ? { type } : {}
+        const searchParams = {...searchKeyword, ...searchType}
+        const total = await Product.countDocuments(searchParams)
+        const products = await Product.find(searchParams)
         .populate({
             path: 'type',
             select: 'name'
