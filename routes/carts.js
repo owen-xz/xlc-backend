@@ -1,13 +1,13 @@
 var express = require('express');
 const cartController = require('../controller/cart')
-const { isAuth } = require('../handler/auth')
+const { isUser } = require('../handler/auth')
 
 var router = express.Router();
 
 /* GET users listing. */
-router.get('', isAuth, cartController.getCarts)
-router.post('/:productId/:optionId', isAuth, cartController.addCart)
-router.delete('/:productId/:optionId', isAuth, cartController.deleteCart)
-router.patch('/:productId/:optionId', isAuth, cartController.editCart)
+router.get('/carts', isUser, cartController.getCarts)
+router.post('/cart', isUser, cartController.addCart)
+router.delete('/cart/:cartId', isUser, cartController.deleteCart)
+router.patch('/cart/:cartId', isUser, cartController.editCart)
 
 module.exports = router;

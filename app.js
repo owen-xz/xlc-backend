@@ -50,7 +50,7 @@ process.on('uncaughtException', err => {
 app.use('/', indexRouter);
 app.use('/users/', usersRouter);
 app.use(productsRouter);
-app.use('/carts/', cartsRouter);
+app.use('/', cartsRouter);
 app.use('/upload/', uploadRouter);
 app.use(typesRouter);
 

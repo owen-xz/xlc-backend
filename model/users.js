@@ -35,6 +35,12 @@ const user = new mongoose.Schema(
                 optionId: {
                     type: String
                 },
+                price: {
+                    type: Number
+                },
+                discountPrice: {
+                    type: Number
+                },
                 count: {
                     type: Number
                 }

@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { isAuth } = require('../handler/auth')
+const { isAdmin } = require('../handler/auth')
 const handleSuccess = require('../handler/handleSuccess')
 const appErr = require('../handler/appErr')
 const handleErrAsync = require('../handler/handleErrAsync')
@@ -8,7 +8,7 @@ const { imgUpload } = require('../handler/upload')
 const sizeOf = require("image-size");
 const { ImgurClient } = require('imgur')
 
-router.post('/img', isAuth, imgUpload, handleErrAsync(async (req, res, next) => {
+router.post('/img', isAdmin, imgUpload, handleErrAsync(async (req, res, next) => {
   if(!req.files.length) {
     return next(appErr(400, '未上傳檔案', next))
   }

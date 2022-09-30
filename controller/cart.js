@@ -11,27 +11,22 @@ const cartController = {
         .select('carts')
         .populate({
             path: 'carts.productId',
-            select: 'name photo options'
+            select: 'name photo'
         })
         handleSuccess(res, carts)
     }),
     addCart: handleErrAsync(async (req, res, next) => {
         const { userId, params, body } = req
-        const { productId, optionId } = params
-        const { count } = body
-        const product = await Product.find({
-            _id: productId,
-            options: {
-                $in: [
-                    {
-                        _id: optionId
-                    }
-                ]
-            }
-        })
+        const { productId, optionId, count } = body
+        const product = await Product.findById(productId)
         if(!product) {
-            return next(appErr(400, '查無此 Id！', next))
+            return next(appErr(400, '查無此商品 Id！', next))
         }
+        const option = product.options.find(item => item._id.toString() === optionId)
+        if(!option) {
+            return next(appErr(400, '查無此品項 Id！', next))
+        }
+        const { price, discountPrice } = option
         if(!count) {
             return next(appErr(400, '請輸入品項數量', next))
         }
@@ -55,6 +50,8 @@ const cartController = {
                 carts: {
                     productId,
                     optionId,
+                    price,
+                    discountPrice,
                     count
                 }
             }
@@ -63,27 +60,11 @@ const cartController = {
     }),
     deleteCart: handleErrAsync(async (req, res, next) => {
         const { userId, params } = req
-        const { productId, optionId } = params
-        const product = await Product.find({
-            _id: productId,
-            options: {
-                $in: [
-                    {
-                        _id: optionId
-                    }
-                ]
-            }
-        })
-        if(!product) {
-            return next(appErr(400, '查無此 Id！', next))
-        }
+        const { cartId } = params
         const isInCart = (await User.find({
             _id: userId,
-            'carts.productId': {
-                $in: [ productId ]
-            },
-            'carts.optionId': {
-                $in: [ optionId ]
+            'carts._id': {
+                $in: [ cartId ]
             }
         })).length
         if(!isInCart) {
@@ -92,8 +73,7 @@ const cartController = {
         await User.findByIdAndUpdate(userId, {
             $pull: {
                 carts: {
-                    productId,
-                    optionId
+                    _id: cartId
                 }
             }
         })
@@ -101,21 +81,8 @@ const cartController = {
     }),
     editCart: handleErrAsync(async (req, res, next) => {
         const { userId, params, body } = req
-        const { productId, optionId } = params
+        const { cartId } = params
         const { count } = body
-        const product = await Product.find({
-            _id: productId,
-            options: {
-                $in: [
-                    {
-                        _id: optionId
-                    }
-                ]
-            }
-        })
-        if(!product) {
-            return next(appErr(400, '查無此 Id！', next))
-        }
         if(!count) {
             return next(appErr(400, '請輸入品項數量', next))
         }
@@ -124,12 +91,9 @@ const cartController = {
         }
         const isInCart = (await User.find({
             _id: userId,
-            'carts.productId': {
-                $in: [ productId ]
+            'carts._id': {
+                $in: [ cartId ]
             },
-            'carts.optionId': {
-                $in: [ optionId ]
-            }
         })).length
         if(!isInCart) {
             return next(appErr(400, '此商品尚未加入購物車', next))
@@ -139,8 +103,7 @@ const cartController = {
                 _id: userId,
                 carts: {
                     $elemMatch: {
-                        productId,
-                        optionId
+                        _id: cartId
                     }
                 }
             },
