@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { enumList } = require('../enum/product')
 
 const product = new mongoose.Schema(
     {
@@ -10,8 +11,8 @@ const product = new mongoose.Schema(
             type: String
         },
         type: {
-            type: mongoose.Schema.ObjectId,
-            ref: 'type',
+            type: Number,
+            enum: enumList.typeEnum,
             require: [true, 'type 必填']
         },
         options: [

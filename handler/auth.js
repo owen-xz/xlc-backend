@@ -27,6 +27,7 @@ const isAdmin = handleErrAsync(async(req, res, next) => {
     return next(appErr(403, '您沒有權限進行此操作', next))
   }
   req.userId = decode.id
+  req.roles = decode.roles
   next()
 })
 
@@ -43,6 +44,7 @@ const isUser = handleErrAsync(async(req, res, next) => {
     return next(appErr(403, '您沒有權限進行此操作', next))
   }
   req.userId = decode.id
+  req.roles = decode.roles
   next()
 })
 

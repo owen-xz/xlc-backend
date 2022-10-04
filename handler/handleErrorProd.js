@@ -2,6 +2,8 @@ const resErrorProd = (err, res) => {
   if (err.isOperational) {
     res.status(err.statusCode).json({
       message: err.message,
+      code: err.code || `${err.statusCode}000`,
+      data: err.data || null
     });
   } else {
     // log 紀錄

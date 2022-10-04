@@ -11,11 +11,13 @@ var handleErrorDev = require('./handler/handleErrorDev')
 var handleErrorProd = require('./handler/handleErrorProd')
 
 var indexRouter = require('./routes/index');
+var commonRouter = require('./routes/common');
 var usersRouter = require('./routes/users');
 var productsRouter = require('./routes/products');
 var cartsRouter = require('./routes/carts');
 var uploadRouter = require('./routes/upload');
-var typesRouter = require('./routes/types');
+var ordersRouter = require('./routes/orders');
+var couponsRouter = require('./routes/coupons');
 
 var app = express();
 
@@ -48,11 +50,13 @@ process.on('uncaughtException', err => {
 });
 
 app.use('/', indexRouter);
+app.use('/common', commonRouter);
 app.use('/users/', usersRouter);
 app.use(productsRouter);
 app.use('/', cartsRouter);
 app.use('/upload/', uploadRouter);
-app.use(typesRouter);
+app.use('/', ordersRouter);
+app.use('/', couponsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
