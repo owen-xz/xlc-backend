@@ -5,7 +5,41 @@ const handleErrAsync = require('../handler/handleErrAsync')
 
 const couponController = {
     getCoupons: handleErrAsync(async (req, res, next) => {
-        const coupons = await Coupon.find()
+        const { couponSn, enable, startAt, dueAt } = req.query
+        const searchCouponSn = couponSn ? {"couponSn": new RegExp(req.query.couponSn)} : {};
+        let filterEnable = []
+        if(enable) {
+            filterEnable = enable.map(item => {
+                if(item === 'false') {
+                    return false
+                } else {
+                    return true
+                }
+            })
+        }
+        const searchEnable = enable ? {
+            "enable": {
+                $in: filterEnable
+            }
+        } : {}
+        const searchStartAt = startAt ? {
+            "startAt": {
+                $gte: startAt
+            }
+        } : {}
+        const searchDueAt = dueAt ? {
+            "dueAt": {
+                $lt: dueAt
+            }
+        } : {}
+        const searchParams = {
+            ...searchCouponSn,
+            ...searchEnable,
+            ...searchStartAt,
+            ...searchDueAt
+        }
+        const coupons = await Coupon.find(searchParams)
+        .select('couponSn discount enable startAt dueAt description')
         handleSuccess(res, coupons)
     }),
     getCoupon: handleErrAsync(async (req, res, next) => {

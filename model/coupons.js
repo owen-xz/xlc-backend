@@ -22,12 +22,12 @@ const coupon = new mongoose.Schema(
             type: Date,
             require: [true, 'dueAt 必填']
         },
+        description: {
+            type: String
+        },
         createdAt: {
             type: Date,
             default: Date.now
-        },
-        description: {
-            type: String
         }
     },
     {
