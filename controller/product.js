@@ -48,6 +48,9 @@ const productController = {
     getProduct: handleErrAsync(async (req, res, next) => {
         const { productId } = req.params
         const product = await Product.findById(productId)
+        if(!product) {
+            return next(appErr(400, '查無此 Id！', next))
+        }
         handleSuccess(res, product)
     }),
     createProduct: handleErrAsync(async (req, res, next) => {
@@ -88,7 +91,10 @@ const productController = {
     }),
     deleteProduct: handleErrAsync(async (req, res, next) => {
         const { productId } = req.params
-        await Product.findByIdAndDelete(productId)
+        const product = await Product.findByIdAndDelete(productId)
+        if(!product) {
+            return next(appErr(400, '查無此 Id！', next))
+        }
         handleSuccess(res, '')
     }),
     editProduct: handleErrAsync(async (req, res, next) => {
@@ -121,7 +127,10 @@ const productController = {
                 return next(appErr(400, '數量不可小於 0', next))
             }
         })
-        await Product.findByIdAndUpdate(productId, body)
+        const product = await Product.findByIdAndUpdate(productId, body)
+        if(!product) {
+            return next(appErr(400, '查無此 Id！', next))
+        }
         handleSuccess(res, '')
     }),
     createComment: handleErrAsync(async (req, res, next) => {
@@ -143,6 +152,9 @@ const productController = {
                 }
             }
         })
+        if(!product) {
+            return next(appErr(400, '查無此 Id！', next))
+        }
         const commentCount = product.comments.length + 1
         const averageScore = ((product.score * (commentCount - 1) + score) / commentCount).toFixed(1)
         await Product.findByIdAndUpdate(productId, {

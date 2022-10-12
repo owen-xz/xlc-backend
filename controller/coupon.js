@@ -72,7 +72,10 @@ const couponController = {
         handleSuccess(res, '')
     }),
     deleteCoupons: handleErrAsync(async (req, res, next) => {
-        await Coupon.deleteMany({})
+        const coupon = await Coupon.deleteMany({})
+        if(!coupon) {
+            return next(appErr(400, '查無此 Id！', next))
+        }
         handleSuccess(res, '')
     }),
     deleteCoupon: handleErrAsync(async (req, res, next) => {
@@ -103,6 +106,9 @@ const couponController = {
             return next(appErr(400, '請輸入到期時間', next))
         }
         const coupon = await Coupon.findByIdAndUpdate(couponId, body)
+        if(!coupon) {
+            return next(appErr(400, '查無此 Id！', next))
+        }
         handleSuccess(res, '')
     })
 }

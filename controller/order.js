@@ -26,6 +26,9 @@ const orderController = {
             path: 'orderer',
             select: 'name'
         })
+        if(!order) {
+            return next(appErr(400, '查無此 Id！', next))
+        }
         handleSuccess(res, order)
     }),
     createOrder: handleErrAsync(async (req, res, next) => {
@@ -146,9 +149,12 @@ const orderController = {
                 return next(appErr(403, '您沒有權限進行此操作', next))
             }
         }
-        await Order.findByIdAndUpdate(orderId, {
+        const order = await Order.findByIdAndUpdate(orderId, {
             status: 6
         })
+        if(!order) {
+            return next(appErr(400, '查無此 Id！', next))
+        }
         handleSuccess(res, '')
     }),
     completeOrder: handleErrAsync(async (req, res, next) => {
@@ -156,12 +162,18 @@ const orderController = {
         const order = await Order.findByIdAndUpdate(orderId, {
             status: 5
         })
+        if(!order) {
+            return next(appErr(400, '查無此 Id！', next))
+        }
         handleSuccess(res, '')
     }),
     payOrder: handleErrAsync(async (req, res, next) => {
         const { params, userId } = req
         const { orderId } = params
         const order = await Order.findById(orderId).select('orderer')
+        if(!order) {
+            return next(appErr(400, '查無此 Id！', next))
+        }
         if(userId !== order.orderer.toString()) {
             return next(appErr(403, '您沒有權限進行此操作', next))
         }
