@@ -44,15 +44,15 @@ const orderController = {
             ...searchTransportType,
             ...searchCreatedAt
         }
+        const total = await Order.countDocuments(searchParams)
         const orders = await Order.find(searchParams)
-        .populate({
-            path: 'orderer',
-            select: 'name'
-        })
-        .select('receiver status paymentType transportType createdAt')
+        .select('orderer receiver status paymentType transportType createdAt')
         .skip(offset)
         .limit(maxCount)
-        handleSuccess(res, orders)
+        handleSuccess(res, {
+            orders,
+            total
+        })
     }),
     getOrder: handleErrAsync(async (req, res, next) => {
         const { orderId } = req.params
