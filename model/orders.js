@@ -27,9 +27,14 @@ const order = new mongoose.Schema(
             default: 1
         },
         orderer: {
-            type: mongoose.Schema.ObjectId,
-            ref: 'user',
-            require: [true, 'creater 必填']
+            ordererId: {
+                type: mongoose.Schema.ObjectId,
+                ref: 'user',
+                require: [true, 'orderer 必填']
+            },
+            ordererName: {
+                type: String
+            }
         },
         receiver: {
             name: {

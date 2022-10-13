@@ -6,7 +6,7 @@ const handleErrAsync = require('../handler/handleErrAsync')
 const couponController = {
     getCoupons: handleErrAsync(async (req, res, next) => {
         const { couponSn, enable, startAt, dueAt } = req.query
-        const searchCouponSn = couponSn ? {"couponSn": new RegExp(req.query.couponSn)} : {};
+        const searchCouponSn = couponSn ? {"couponSn": new RegExp(couponSn)} : {};
         let filterEnable = []
         if(enable) {
             filterEnable = enable.map(item => {

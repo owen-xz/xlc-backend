@@ -1,5 +1,6 @@
 const Order = require('../model/orders')
 const Product = require('../model/products')
+const User = require('../model/users')
 const handleSuccess = require('../handler/handleSuccess')
 const appErr = require('../handler/appErr')
 const handleErrAsync = require('../handler/handleErrAsync')
@@ -7,12 +8,50 @@ const Coupon = require('../model/coupons')
 
 const orderController = {
     getOrders: handleErrAsync(async (req, res, next) => {
-        const orders = await Order.find()
+        const {
+            orderId,
+            orderer,
+            status,
+            paymentType,
+            transportType,
+            startAt,
+            dueAt,
+            offset,
+            maxCount
+        } = req.query
+        if(!offset) {
+            return next(appErr(400, 'offset is required', next))
+        }
+        if(!maxCount) {
+            return next(appErr(400, 'maxCount is required', next))
+        }
+        const searchOrderId = orderId ? { "_id": orderId } : {};
+        const searchOrderer = orderer ? { "orderer.ordererName": new RegExp(orderer) } : {};
+        const searchStatus = status ? { status } : {};
+        const searchPaymentType = paymentType ? { paymentType } : {};
+        const searchTransportType = transportType ? { transportType } : {};
+        const searchCreatedAt = {}
+        if(startAt || dueAt) {
+            searchCreatedAt.createdAt = {}
+            if(startAt) searchCreatedAt.createdAt.$gte = startAt
+            if(dueAt) searchCreatedAt.createdAt.$lt = dueAt
+        }
+        const searchParams = {
+            ...searchOrderId,
+            ...searchOrderer,
+            ...searchStatus,
+            ...searchPaymentType,
+            ...searchTransportType,
+            ...searchCreatedAt
+        }
+        const orders = await Order.find(searchParams)
         .populate({
             path: 'orderer',
             select: 'name'
         })
         .select('receiver status paymentType transportType createdAt')
+        .skip(offset)
+        .limit(maxCount)
         handleSuccess(res, orders)
     }),
     getOrder: handleErrAsync(async (req, res, next) => {
@@ -82,7 +121,8 @@ const orderController = {
                 return next(appErr(400, '請輸入取貨方式', next))
             }
             let finalPrice = totalPrice
-            let coupon = ''
+            const orderer = await User.findById(userId).select('name')
+            let coupon
             if(couponSn) {
                 const selectCoupon = await Coupon.find({
                     couponSn
@@ -117,7 +157,10 @@ const orderController = {
                 coupon,
                 totalPrice,
                 finalPrice,
-                orderer: userId
+                orderer: {
+                    ordererId: userId,
+                    ordererName: orderer.name
+                }
             })
             handleSuccess(res, '')
         })
