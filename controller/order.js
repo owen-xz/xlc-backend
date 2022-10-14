@@ -77,39 +77,66 @@ const orderController = {
             receiver,
             paymentType,
             transportType,
-            couponSn
+            couponSn,
+            ...others
         } = body
         let totalPrice = 0
-        const checkProduct = (products) => {
-            // 這邊 forEach 直接使用 async 不會正常運作，故自訂 Promise function
-            return new Promise((resolve, reject) => {
-                products.forEach(async (item) => {
+        const sendProducts = []
+        function checkProduct (item) {
+            return new Promise(async (resolve, reject) => {
+                try {
                     const product = await Product.findById(item.productId)
-                    const option = product.options.find(optionItem => optionItem._id.toString() === item.optionId)
-                    if(!option) {
-                        reject({
+                    if(!product) {
+                        return reject({
                             type: 1,
+                            data: item.productId
+                        })
+                    }
+                    const option = product.options.find(optionItem => optionItem._id.toString() === item.optionId)
+                    console.log(option);
+                    if(!option) {
+                        console.log(option);
+                        return reject({
+                            type: 2,
                             data: item.optionId
                         })
                     }
                     if(!item.count) {
-                        reject({
-                            type: 2,
-                            data: null
-                        })
-                    }
-                    if(item.count < 1) {
-                        reject({
+                        return reject({
                             type: 3,
                             data: null
                         })
                     }
+                    if(item.count < 1) {
+                        return reject({
+                            type: 4,
+                            data: null
+                        })
+                    }
+                    sendProducts.push({
+                        productId: item.productId,
+                        productName: product.name,
+                        optionId: item.optionId,
+                        optionName: option.name,
+                        price: option.price,
+                        discountPrice: option.discountPrice,
+                        count: item.count
+                    })
                     totalPrice += option.discountPrice * item.count
                     resolve()
-                })
+                } catch {
+                    reject({
+                        type: 5,
+                        data: null
+                    })
+                }
             })
         }
-        await checkProduct(products)
+        const promiseList = []
+        products.forEach(product => {
+            promiseList.push(checkProduct(product))
+        })
+        Promise.all(promiseList)
         .then(async () => {
             if(!receiver || !receiver.name || !receiver.phone || !receiver.email || !receiver.address) {
                 return next(appErr(400, '取貨人資料不完整', next))
@@ -132,28 +159,37 @@ const orderController = {
                         400,
                         {
                             message:'查無此優惠券',
-                            code: 400002
+                            code: 400003
                         },
                         next
                     ))
                 }
-                const { _id, discount, enable, startAt, dueAt } = selectCoupon[0]
+                const { discount, enable, startAt, dueAt } = selectCoupon[0]
                 const today = new Date()
                 if(startAt > today || dueAt < today || !enable) {
                     return next(appErr(
                         400,
                         {
                             message:'此優惠券已失效',
-                            code: 400003
+                            code: 400004
                         },
                         next
                     ))
                 }
-                coupon = _id
+                coupon = {
+                    couponSn,
+                    discount
+                }
                 finalPrice = totalPrice * discount
+            } else {
+                finalPrice = totalPrice
             }
             await Order.create({
-                ...body,
+                products: sendProducts,
+                receiver,
+                paymentType,
+                transportType,
+                others,
                 coupon,
                 totalPrice,
                 finalPrice,
@@ -170,16 +206,28 @@ const orderController = {
                     return next(appErr(
                         400,
                         {
-                            message:'查無此品項 Id！',
+                            message:'查無此商品 Id！',
                             code: 400001,
                             data: err.data
                         },
                         next
                     ))
                 case 2:
-                    return next(appErr(400, '請輸入購買數量', next))
+                    return next(appErr(
+                        400,
+                        {
+                            message:'查無此品項 Id！',
+                            code: 400002,
+                            data: err.data
+                        },
+                        next
+                    ))
                 case 3:
+                    return next(appErr(400, '請輸入購買數量', next))
+                case 4:
                     return next(appErr(400, '購買數量不可 < 1', next))
+                case 5:
+                    return next(appErr(400, '查無此 Id', next))
             }
         })
     }),

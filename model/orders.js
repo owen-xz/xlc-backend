@@ -8,11 +8,27 @@ const order = new mongoose.Schema(
                 productId: {
                     type: mongoose.Schema.ObjectId,
                     ref: 'product',
-                    require: [true, 'product 必填']
+                    require: [true, 'productId 必填']
+                },
+                productName: {
+                    type: String,
+                    require: [true, 'productName 必填']
                 },
                 optionId: {
                     type: mongoose.Schema.ObjectId,
                     require: [true, 'objectId 必填']
+                },
+                optionName: {
+                    type: String,
+                    require: [true, 'optionName 必填']
+                },
+                price: {
+                    type: Number,
+                    require: [true, 'price 必填']
+                },
+                discountPrice: {
+                    type: Number,
+                    require: [true, 'discountPrice 必填']
                 },
                 count: {
                     type: Number,
@@ -65,8 +81,12 @@ const order = new mongoose.Schema(
             require: [true, 'transportType 必填']
         },
         coupon: {
-            type: mongoose.Schema.ObjectId,
-            ref: 'coupon'
+            couponSn: {
+                type: String
+            },
+            discount: {
+                type: Number
+            }
         },
         note: {
             type: String
