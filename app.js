@@ -96,4 +96,5 @@ process.on('unhandledRejection', (reason, promise) => {
   // 記錄於 log 上
 });
 
+console.log('success')
 module.exports = app;
