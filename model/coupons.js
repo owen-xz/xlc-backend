@@ -2,28 +2,21 @@ const mongoose = require('mongoose')
 
 const coupon = new mongoose.Schema(
     {
-        couponSn: {
+        code: {
             type: String,
-            require: [true, 'couponSn 必填']
+            require: [true, 'code 必填']
         },
-        discount: {
+        percent: {
             type: Number,
-            require: [true, 'discount 必填']
+            require: [true, 'percent 必填']
         },
-        enable: {
+        isEnabled: {
             type: Boolean,
             default: true
-        },
-        startAt: {
-            type: Date,
-            require: [true, 'startAt 必填']
         },
         dueAt: {
             type: Date,
             require: [true, 'dueAt 必填']
-        },
-        description: {
-            type: String
         },
         createdAt: {
             type: Date,

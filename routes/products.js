@@ -11,6 +11,5 @@ router.post('/product/', isAdmin, productController.createProduct)
 router.delete('/products/', isAdmin, productController.deleteProducts)
 router.delete('/product/:productId', isAdmin, productController.deleteProduct)
 router.patch('/product/:productId', isAdmin, productController.editProduct)
-router.post('/product/:productId/comment', isAdmin, productController.createComment)
 
 module.exports = router;

@@ -30,22 +30,15 @@ const user = new mongoose.Schema(
             {
                 productId: {
                     type: mongoose.Schema.ObjectId,
-                    ref: 'product'
+                    ref: 'product',
+                    require: [true, 'productId 必填']
                 },
-                optionId: {
-                    type: String
-                },
-                price: {
-                    type: Number
-                },
-                discountPrice: {
-                    type: Number
-                },
-                count: {
-                    type: Number
+                qty: {
+                    type: Number,
+                    require: [true, 'qty 必填']
                 }
             }
-        ],
+        ]
     },
     {
         versionKey: false

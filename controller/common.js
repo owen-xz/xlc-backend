@@ -6,6 +6,9 @@ const pageList = require('../enum/index')
 const commonController = {
     getPageListItem: handleErrAsync(async (req, res, next) => {
         const { featureName } = req.params
+        if(!pageList[featureName]) {
+            return next(appErr(400, '查無此功能', next))
+        }
         handleSuccess(res, pageList[featureName])
     })
 }

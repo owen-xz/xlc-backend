@@ -5,41 +5,23 @@ const handleErrAsync = require('../handler/handleErrAsync')
 
 const couponController = {
     getCoupons: handleErrAsync(async (req, res, next) => {
-        const { couponSn, enable, startAt, dueAt } = req.query
-        const searchCouponSn = couponSn ? {"couponSn": new RegExp(couponSn)} : {};
-        let filterEnable = []
-        if(enable) {
-            filterEnable = enable.map(item => {
-                if(item === 'false') {
-                    return false
-                } else {
-                    return true
-                }
-            })
+        const { code, isEnabled } = req.query
+        const searchCode = code ? {"code": new RegExp(code)} : {};
+        let filterIsEnabled = []
+        if(isEnabled) {
+            filterIsEnabled = isEnabled.map(item => item === 'false' ? false : true)
         }
-        const searchEnable = enable ? {
-            "enable": {
-                $in: filterEnable
-            }
-        } : {}
-        const searchStartAt = startAt ? {
-            "startAt": {
-                $gte: startAt
-            }
-        } : {}
-        const searchDueAt = dueAt ? {
-            "dueAt": {
-                $lt: dueAt
+        const searchIsEnabled = isEnabled ? {
+            "isEnabled": {
+                $in: filterIsEnabled
             }
         } : {}
         const searchParams = {
-            ...searchCouponSn,
-            ...searchEnable,
-            ...searchStartAt,
-            ...searchDueAt
+            ...searchCode,
+            ...searchIsEnabled,
         }
         const coupons = await Coupon.find(searchParams)
-        .select('couponSn discount enable startAt dueAt description')
+        .select('code percent isEnabled dueAt')
         handleSuccess(res, coupons)
     }),
     getCoupon: handleErrAsync(async (req, res, next) => {
@@ -52,18 +34,15 @@ const couponController = {
     }),
     createCoupon: handleErrAsync(async (req, res, next) => {
         const { body } = req
-        const { couponSn, discount, startAt, dueAt } = body
-        if(!couponSn || !couponSn.trim()) {
+        const { code, percent, dueAt } = body
+        if(!code || !code.trim()) {
             return next(appErr(400, '請輸入優惠券序號', next))
         }
-        if(!discount) {
+        if(!percent) {
             return next(appErr(400, '請輸入優惠比例', next))
         }
-        if(discount < 0 || discount > 1) {
+        if(percent < 0 || percent > 1) {
             return next(appErr(400, '優惠比例需介於 0～1 之間', next))
-        }
-        if(!startAt) {
-            return next(appErr(400, '請輸入開始時間', next))
         }
         if(!dueAt) {
             return next(appErr(400, '請輸入到期時間', next))
@@ -88,19 +67,16 @@ const couponController = {
     }),
     editCoupon: handleErrAsync(async (req, res, next) => {
         const { body, params } = req
-        const { couponSn, discount, startAt, dueAt } = body
+        const { code, percent, dueAt } = body
         const { couponId } = params
-        if(!couponSn || !couponSn.trim()) {
+        if(!code || !code.trim()) {
             return next(appErr(400, '請輸入優惠券序號', next))
         }
-        if(!discount) {
+        if(!percent) {
             return next(appErr(400, '請輸入優惠比例', next))
         }
-        if(discount < 0 || discount > 1) {
+        if(percent < 0 || percent > 1) {
             return next(appErr(400, '優惠比例需介於 0～1 之間', next))
-        }
-        if(!startAt) {
-            return next(appErr(400, '請輸入開始時間', next))
         }
         if(!dueAt) {
             return next(appErr(400, '請輸入到期時間', next))

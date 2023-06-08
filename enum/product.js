@@ -1,4 +1,4 @@
-const type = [
+const category = [
     {
         id: 1,
         name: '器材',
@@ -13,13 +13,13 @@ const type = [
     }
 ]
 
-const typeEnum = type.map(item => item.id)
+const categoryEnum = category.map(item => item.id)
 
 module.exports = {
     pageList: {
-        type
+        category
     },
     enumList: {
-        typeEnum
+        categoryEnum
     }
 }

@@ -10,29 +10,17 @@ const order = new mongoose.Schema(
                     ref: 'product',
                     require: [true, 'productId 必填']
                 },
-                productName: {
+                title: {
                     type: String,
-                    require: [true, 'productName 必填']
-                },
-                optionId: {
-                    type: mongoose.Schema.ObjectId,
-                    require: [true, 'objectId 必填']
-                },
-                optionName: {
-                    type: String,
-                    require: [true, 'optionName 必填']
+                    require: [true, 'title 必填']
                 },
                 price: {
                     type: Number,
-                    require: [true, 'price 必填']
+                    required: [true, 'price 必填']
                 },
-                discountPrice: {
+                qty: {
                     type: Number,
-                    require: [true, 'discountPrice 必填']
-                },
-                count: {
-                    type: Number,
-                    require: [true, 'count 必填']
+                    require: [true, 'qty 必填']
                 }
             }
         ],
@@ -42,24 +30,14 @@ const order = new mongoose.Schema(
             require: [true, 'status 必填'],
             default: 1
         },
-        orderer: {
-            ordererId: {
-                type: mongoose.Schema.ObjectId,
-                ref: 'user',
-                require: [true, 'orderer 必填']
-            },
-            ordererName: {
-                type: String
-            }
-        },
-        receiver: {
+        user: {
             name: {
                 type: String,
                 require: [true, 'user.name 必填']
             },
-            phone: {
+            tel: {
                 type: String,
-                require: [true, 'user.phone 必填']
+                require: [true, 'user.tel 必填']
             },
             email: {
                 type: String,
@@ -81,14 +59,14 @@ const order = new mongoose.Schema(
             require: [true, 'transportType 必填']
         },
         coupon: {
-            couponSn: {
+            code: {
                 type: String
             },
-            discount: {
+            percent: {
                 type: Number
             }
         },
-        note: {
+        message: {
             type: String
         },
         totalPrice: {

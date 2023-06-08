@@ -10,7 +10,7 @@ const orderController = {
     getOrders: handleErrAsync(async (req, res, next) => {
         const {
             orderId,
-            orderer,
+            user,
             status,
             paymentType,
             transportType,
@@ -26,7 +26,7 @@ const orderController = {
             return next(appErr(400, 'maxCount is required', next))
         }
         const searchOrderId = orderId ? { "_id": orderId } : {};
-        const searchOrderer = orderer ? { "orderer.ordererName": new RegExp(orderer) } : {};
+        const searchUser = user ? { "user.name": user } : {};
         const searchStatus = status ? { status } : {};
         const searchPaymentType = paymentType ? { paymentType } : {};
         const searchTransportType = transportType ? { transportType } : {};
@@ -38,7 +38,7 @@ const orderController = {
         }
         const searchParams = {
             ...searchOrderId,
-            ...searchOrderer,
+            ...searchUser,
             ...searchStatus,
             ...searchPaymentType,
             ...searchTransportType,
@@ -46,7 +46,7 @@ const orderController = {
         }
         const total = await Order.countDocuments(searchParams)
         const orders = await Order.find(searchParams)
-        .select('orderer receiver status paymentType transportType createdAt')
+        .select('user status paymentType transportType createdAt')
         .skip(offset)
         .limit(maxCount)
         handleSuccess(res, {
@@ -57,27 +57,19 @@ const orderController = {
     getOrder: handleErrAsync(async (req, res, next) => {
         const { orderId } = req.params
         const order = await Order.findById(orderId)
-        .populate({
-            path: 'products.productId',
-            select: 'name image options'
-        })
-        .populate({
-            path: 'orderer',
-            select: 'name'
-        })
         if(!order) {
             return next(appErr(400, '查無此 Id！', next))
         }
         handleSuccess(res, order)
     }),
     createOrder: handleErrAsync(async (req, res, next) => {
-        const { userId, body } = req
+        const { body } = req
         const {
             products,
-            receiver,
+            user,
+            couponCode,
             paymentType,
             transportType,
-            couponSn,
             ...others
         } = body
         let totalPrice = 0
@@ -92,22 +84,19 @@ const orderController = {
                             data: item.productId
                         })
                     }
-                    const option = product.options.find(optionItem => optionItem._id.toString() === item.optionId)
-                    console.log(option);
-                    if(!option) {
-                        console.log(option);
+                    if(!item.qty) {
                         return reject({
                             type: 2,
-                            data: item.optionId
+                            data: null
                         })
                     }
-                    if(!item.count) {
+                    if(item.qty < 1) {
                         return reject({
                             type: 3,
                             data: null
                         })
                     }
-                    if(item.count < 1) {
+                    if(item.qty > product.num) {
                         return reject({
                             type: 4,
                             data: null
@@ -115,14 +104,9 @@ const orderController = {
                     }
                     sendProducts.push({
                         productId: item.productId,
-                        productName: product.name,
-                        optionId: item.optionId,
-                        optionName: option.name,
-                        price: option.price,
-                        discountPrice: option.discountPrice,
-                        count: item.count
+                        qty: item.qty
                     })
-                    totalPrice += option.discountPrice * item.count
+                    totalPrice += product.price * item.qty
                     resolve()
                 } catch {
                     reject({
@@ -138,7 +122,7 @@ const orderController = {
         })
         Promise.all(promiseList)
         .then(async () => {
-            if(!receiver || !receiver.name || !receiver.phone || !receiver.email || !receiver.address) {
+            if(!user || !user.name || !user.tel || !user.email || !user.address) {
                 return next(appErr(400, '取貨人資料不完整', next))
             }
             if(!paymentType) {
@@ -147,12 +131,10 @@ const orderController = {
             if(!transportType) {
                 return next(appErr(400, '請輸入取貨方式', next))
             }
-            let finalPrice = totalPrice
-            const orderer = await User.findById(userId).select('name')
             let coupon
-            if(couponSn) {
+            if(couponCode) {
                 const selectCoupon = await Coupon.find({
-                    couponSn
+                    code: couponCode
                 })
                 if(!selectCoupon || !selectCoupon.length) {
                     return next(appErr(
@@ -164,9 +146,9 @@ const orderController = {
                         next
                     ))
                 }
-                const { discount, enable, startAt, dueAt } = selectCoupon[0]
+                const { percent, isEnabled, dueAt } = selectCoupon[0]
                 const today = new Date()
-                if(startAt > today || dueAt < today || !enable) {
+                if(dueAt < today || !isEnabled) {
                     return next(appErr(
                         400,
                         {
@@ -177,8 +159,8 @@ const orderController = {
                     ))
                 }
                 coupon = {
-                    couponSn,
-                    discount
+                    code: couponCode,
+                    percent
                 }
                 finalPrice = totalPrice * discount
             } else {
@@ -186,17 +168,13 @@ const orderController = {
             }
             await Order.create({
                 products: sendProducts,
-                receiver,
+                user,
                 paymentType,
                 transportType,
                 others,
                 coupon,
                 totalPrice,
                 finalPrice,
-                orderer: {
-                    ordererId: userId,
-                    ordererName: orderer.name
-                }
             })
             handleSuccess(res, '')
         })
@@ -213,19 +191,11 @@ const orderController = {
                         next
                     ))
                 case 2:
-                    return next(appErr(
-                        400,
-                        {
-                            message:'查無此品項 Id！',
-                            code: 400002,
-                            data: err.data
-                        },
-                        next
-                    ))
-                case 3:
                     return next(appErr(400, '請輸入購買數量', next))
+                case 3:
+                    return next(appErr(400, '購買數量不可小於 1', next))
                 case 4:
-                    return next(appErr(400, '購買數量不可 < 1', next))
+                    return next(appErr(400, '購買數量不可大於商品數量', next))
                 case 5:
                     return next(appErr(400, '查無此 Id', next))
             }

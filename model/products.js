@@ -3,62 +3,49 @@ const { enumList } = require('../enum/product')
 
 const product = new mongoose.Schema(
     {
-        name: {
+        title: {
             type: String,
-            require: [true, 'name 必填']
+            require: [true, 'title 必填']
         },
-        photo: {
+        category: {
+            type: Number,
+            enum: enumList.categoryEnum,
+            require: [true, 'category 必填']
+        },
+        content: {
             type: String
         },
-        type: {
-            type: Number,
-            enum: enumList.typeEnum,
-            require: [true, 'type 必填']
-        },
-        options: [
-            {
-                name: {
-                    type: String
-                },
-                price: {
-                    type: Number,
-                    require: [true, 'price 必填']
-                },
-                discountPrice: {
-                    type: Number
-                },
-                count: {
-                    type: Number,
-                    require: [true, 'count 必填']
-                }
-            }
-        ],
         description: {
             type: String
         },
-        score: {
+        originPrice: {
             type: Number,
-            default: 0
+            require: [true, 'originPrice 必填']
         },
-        comments: [
-            {
-                user: {
-                    type: mongoose.Schema.ObjectId,
-                    ref: 'user'
-                },
-                commentMessage: {
-                    type: String
-                },
-                score: {
-                    type: Number,
-                    enum: [1, 2, 3, 4, 5]
-                }
-            }
-        ],
-        status: {
+        price: {
+            type: Number,
+            require: [true, 'price 必填']
+        },
+        unit: {
+            type: String,
+            require: [true, 'unit 必填']
+        },
+        num: {
+            type: Number,
+            require: [true, 'num 必填']
+        },
+        isEnabled: {
             type: Boolean,
             default: true
         },
+        imageUrl: {
+            type: String
+        },
+        imagesUrl: [
+            {
+                type: String
+            }
+        ],
         createdAt: {
             type: Date,
             default: Date.now,
