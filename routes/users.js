@@ -7,6 +7,7 @@ const { isUser } = require('../handler/auth')
 router.post('/sign_up', userController.signUp);
 router.post('/sign_in', userController.signIn);
 router.post('/updatePassword', isUser, userController.updatePassword);
+router.get('/check', isUser, userController.checkToken);
 router.get('/profile', isUser, userController.getUserProfile);
 router.patch('/profile', isUser, userController.patchUserProfile);
 

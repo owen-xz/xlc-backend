@@ -87,6 +87,9 @@ const userController = {
     })
     handleSuccess(res, '')
   }),
+  checkToken: handleErrAsync(async(req, res, next) => {
+    handleSuccess(res)
+  }),
   getUserProfile: handleErrAsync(async(req, res, next) => {
     const user = await User.findById(req.userId)
     handleSuccess(res, user)
