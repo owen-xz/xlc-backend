@@ -51,9 +51,9 @@ const productController = {
     }),
     createProduct: handleErrAsync(async (req, res, next) => {
         const { body } = req
-        const { name, category, originPrice, unit, num } = body
-        if(!name || !name.trim()) {
-            return next(appErr(400, '請輸入商品名稱', next))
+        const { title, category, originPrice, unit, num } = body
+        if(!title || !title.trim()) {
+            return next(appErr(400, '請輸入商品標題', next))
         }
         if(!category) {
             return next(appErr(400, '請輸入商品類型', next))
@@ -90,10 +90,10 @@ const productController = {
     }),
     editProduct: handleErrAsync(async (req, res, next) => {
         const { body, params } = req
-        const { name, type, options } = body
+        const { title, category, originPrice, unit, num } = body
         const { productId } = params
-        if(!name || !name.trim()) {
-            return next(appErr(400, '請輸入商品名稱', next))
+        if(!title || !title.trim()) {
+            return next(appErr(400, '請輸入商品標題', next))
         }
         if(!category) {
             return next(appErr(400, '請輸入商品類型', next))
