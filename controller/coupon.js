@@ -46,9 +46,6 @@ const couponController = {
         if(!percent) {
             return next(appErr(400, '請輸入優惠比例', next))
         }
-        if(percent < 0 || percent > 1) {
-            return next(appErr(400, '優惠比例需介於 0～1 之間', next))
-        }
         if(!dueAt) {
             return next(appErr(400, '請輸入到期時間', next))
         }
@@ -82,9 +79,6 @@ const couponController = {
         }
         if(!percent) {
             return next(appErr(400, '請輸入優惠比例', next))
-        }
-        if(percent < 0 || percent > 1) {
-            return next(appErr(400, '優惠比例需介於 0～1 之間', next))
         }
         if(!dueAt) {
             return next(appErr(400, '請輸入到期時間', next))
