@@ -2,6 +2,10 @@ const mongoose = require('mongoose')
 
 const coupon = new mongoose.Schema(
     {
+        title: {
+            type: String,
+            require: [true, 'title 必填']
+        },
         code: {
             type: String,
             require: [true, 'code 必填']

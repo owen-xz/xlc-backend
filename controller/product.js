@@ -13,7 +13,7 @@ const productController = {
         if(!maxCount) {
             return next(appErr(400, 'maxCount is required', next))
         }
-        let filterSort = 'createdAt'
+        let filterSort = '-createdAt'
         // switch(sort) {
         //     case '0':
         //         filterSort = 'createdAt'

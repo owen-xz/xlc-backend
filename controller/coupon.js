@@ -5,7 +5,8 @@ const handleErrAsync = require('../handler/handleErrAsync')
 
 const couponController = {
     getCoupons: handleErrAsync(async (req, res, next) => {
-        const { code, isEnabled } = req.query
+        const { title, code, isEnabled } = req.query
+        const searchTitle = title ? {"code": new RegExp(title)} : {};
         const searchCode = code ? {"code": new RegExp(code)} : {};
         let filterIsEnabled = []
         if(isEnabled) {
@@ -17,6 +18,7 @@ const couponController = {
             }
         } : {}
         const searchParams = {
+            ...searchTitle,
             ...searchCode,
             ...searchIsEnabled,
         }
@@ -34,7 +36,10 @@ const couponController = {
     }),
     createCoupon: handleErrAsync(async (req, res, next) => {
         const { body } = req
-        const { code, percent, dueAt } = body
+        const { title, code, percent, dueAt } = body
+        if(!title || !title.trim()) {
+            return next(appErr(400, '請輸入優惠券標題', next))
+        }
         if(!code || !code.trim()) {
             return next(appErr(400, '請輸入優惠券序號', next))
         }
@@ -67,8 +72,11 @@ const couponController = {
     }),
     editCoupon: handleErrAsync(async (req, res, next) => {
         const { body, params } = req
-        const { code, percent, dueAt } = body
+        const { title, code, percent, dueAt } = body
         const { couponId } = params
+        if(!title || !title.trim()) {
+            return next(appErr(400, '請輸入優惠券標題', next))
+        }
         if(!code || !code.trim()) {
             return next(appErr(400, '請輸入優惠券序號', next))
         }
