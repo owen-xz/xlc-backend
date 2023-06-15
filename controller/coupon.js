@@ -23,7 +23,7 @@ const couponController = {
             ...searchIsEnabled,
         }
         const coupons = await Coupon.find(searchParams)
-        .select('code percent isEnabled dueAt')
+        .select('title code percent isEnabled dueAt')
         handleSuccess(res, coupons)
     }),
     getCoupon: handleErrAsync(async (req, res, next) => {
