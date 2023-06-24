@@ -46,7 +46,7 @@ const orderController = {
         }
         const total = await Order.countDocuments(searchParams)
         const orders = await Order.find(searchParams)
-        .select('products user status paymentType transportType createdAt')
+        .select('products user status paymentType transportType createdAt totalPrice finalPrice message')
         .skip(offset)
         .limit(maxCount)
         handleSuccess(res, {
@@ -70,7 +70,7 @@ const orderController = {
             couponCode,
             paymentType,
             transportType,
-            ...others
+            message
         } = body
         let totalPrice = 0
         const sendProducts = []
@@ -167,19 +167,20 @@ const orderController = {
                     code: couponCode,
                     percent
                 }
-                finalPrice = totalPrice * percent / 100
+                finalPrice = Math.ceil(totalPrice * percent / 100)
             } else {
                 finalPrice = totalPrice
             }
+            console.log(message);
             await Order.create({
                 products: sendProducts,
                 user,
                 paymentType,
                 transportType,
-                others,
                 coupon,
                 totalPrice,
                 finalPrice,
+                message
             })
             handleSuccess(res, '')
         })
