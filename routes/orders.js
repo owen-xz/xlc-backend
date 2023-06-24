@@ -8,6 +8,7 @@ var router = express.Router();
 router.get('/orders/', isAdmin, orderController.getOrders)
 router.get('/order/:orderId', isUser, orderController.getOrder)
 router.post('/order', isUser, orderController.createOrder)
+router.patch('/order/:orderId', isUser, orderController.editOrder)
 router.post('/order/:orderId/cancel', isUser, orderController.cancelOrder)
 router.post('/order/:orderId/complete', isAdmin, orderController.completeOrder)
 router.post('/order/:orderId/pay', isAdmin, orderController.payOrder)

@@ -46,7 +46,7 @@ const orderController = {
         }
         const total = await Order.countDocuments(searchParams)
         const orders = await Order.find(searchParams)
-        .select('user status paymentType transportType createdAt')
+        .select('products user status paymentType transportType createdAt')
         .skip(offset)
         .limit(maxCount)
         handleSuccess(res, {
@@ -104,6 +104,8 @@ const orderController = {
                     }
                     sendProducts.push({
                         productId: item.productId,
+                        title: product.title,
+                        price: product.price,
                         qty: item.qty
                     })
                     totalPrice += product.price * item.qty
@@ -115,6 +117,9 @@ const orderController = {
                     })
                 }
             })
+        }
+        if(!products) {
+            return next(appErr(400, '請輸入商品', next)) 
         }
         const promiseList = []
         products.forEach(product => {
@@ -162,7 +167,7 @@ const orderController = {
                     code: couponCode,
                     percent
                 }
-                finalPrice = totalPrice * discount
+                finalPrice = totalPrice * percent / 100
             } else {
                 finalPrice = totalPrice
             }
@@ -200,6 +205,21 @@ const orderController = {
                     return next(appErr(400, '查無此 Id', next))
             }
         })
+    }),
+    editOrder: handleErrAsync(async (req, res, next) => {
+        const { params, body } = req
+        const { orderId } = params
+        const { status } = body
+        if(!status) {
+            return next(appErr(400, '請輸入 status', next))
+        }
+        const order = await Order.findByIdAndUpdate(orderId, {
+            status
+        })
+        if(!order) {
+            return next(appErr(400, '查無此 Id！', next))
+        }
+        handleSuccess(res, '')
     }),
     cancelOrder: handleErrAsync(async (req, res, next) => {
         const { params, userId, roles } = req
