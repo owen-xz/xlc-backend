@@ -155,7 +155,7 @@ const productController = {
         if(num < 0) {
             return next(appErr(400, '數量不可小於 0', next))
         }
-        const categoryName = (pageList.product.category.find(item => item.id === category)).name
+        const categoryName = (pageList.product.category.find(item => item.id === +category)).name
         const newProduct = {
             ...body,
             categoryName
