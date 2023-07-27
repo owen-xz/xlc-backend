@@ -3,8 +3,46 @@ const User = require('../model/users')
 const handleSuccess = require('../handler/handleSuccess')
 const appErr = require('../handler/appErr')
 const handleErrAsync = require('../handler/handleErrAsync')
+const pageList = require('../enum/index')
 
 const productController = {
+    getProducts_any: handleErrAsync(async (req, res, next) => {
+        const { keyword, category, offset, maxCount } = req.query
+        if(!offset) {
+            return next(appErr(400, 'offset is required', next))
+        }
+        if(!maxCount) {
+            return next(appErr(400, 'maxCount is required', next))
+        }
+        let filterSort = '-createdAt'
+        // switch(sort) {
+        //     case '0':
+        //         filterSort = 'createdAt'
+        //     case '1':
+        //         filterSort = '-createAt'
+        //     case '2':
+        //         filterSort = 'price'
+        //     case '3':
+        //         filterSort = '-price'
+        //     case '4':
+        //         filterSort = 'score'
+        //     case '5':
+        //         filterSort = '-score'
+        // }
+        const searchKeyword = keyword ? {"name": new RegExp(req.query.keyword)} : {};
+        const searchCategory = category ? { category } : {}
+        const searchParams = {...searchKeyword, ...searchCategory}
+        const total = await Product.countDocuments(searchParams)
+        let products = await Product.find(searchParams)
+        .sort(filterSort)
+        .skip(offset)
+        .limit(maxCount)
+        .select('title categoryName originPrice price imageUrl')
+        handleSuccess(res, {
+            products,
+            total
+        })
+    }),
     getProducts: handleErrAsync(async (req, res, next) => {
         const { keyword, category, offset, maxCount } = req.query
         if(!offset) {
@@ -73,7 +111,11 @@ const productController = {
         if(num < 0) {
             return next(appErr(400, '數量不可小於 0', next))
         }
-        await Product.create(body)
+        const categoryName = (pageList.product.category.find(item => item.id === category)).name
+        await Product.create({
+            ...body,
+            categoryName
+        })
         handleSuccess(res, '')
     }),
     deleteProducts: handleErrAsync(async (req, res, next) => {
@@ -113,7 +155,12 @@ const productController = {
         if(num < 0) {
             return next(appErr(400, '數量不可小於 0', next))
         }
-        const product = await Product.findByIdAndUpdate(productId, body)
+        const categoryName = (pageList.product.category.find(item => item.id === category)).name
+        const newProduct = {
+            ...body,
+            categoryName
+        }
+        const product = await Product.findByIdAndUpdate(productId, newProduct)
         if(!product) {
             return next(appErr(400, '查無此 Id！', next))
         }

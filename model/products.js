@@ -12,6 +12,10 @@ const product = new mongoose.Schema(
             enum: enumList.categoryEnum,
             require: [true, 'category 必填']
         },
+        categoryName: {
+            type: String,
+            require: [true, 'categoryName 必填']
+        },
         content: {
             type: String
         },
