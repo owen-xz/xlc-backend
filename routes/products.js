@@ -5,8 +5,8 @@ const { isAdmin, isUser } = require('../handler/auth')
 var router = express.Router();
 
 /* GET users listing. */
-router.get('/products/', isUser, productController.getProducts)
-router.get('/product/:productId', isUser, productController.getProduct)
+router.get('/products/', productController.getProducts)
+router.get('/product/:productId', productController.getProduct)
 router.post('/product/', isAdmin, productController.createProduct)
 router.delete('/products/', isAdmin, productController.deleteProducts)
 router.delete('/product/:productId', isAdmin, productController.deleteProduct)
