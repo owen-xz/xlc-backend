@@ -31,7 +31,7 @@ const productController = {
         // }
         const searchKeyword = keyword ? {"name": new RegExp(req.query.keyword)} : {};
         const searchCategory = category ? { category } : {}
-        const searchParams = {...searchKeyword, ...searchCategory}
+        const searchParams = {...searchKeyword, ...searchCategory, isEnabled: true}
         const total = await Product.countDocuments(searchParams)
         let products = await Product.find(searchParams)
         .sort(filterSort)
